@@ -1,0 +1,74 @@
+data:
+  data_root: "/users/lmj695/pm"
+  datasets: ["ABCD", "NCANDA"]   # paired T1w+T2w
+  target_shape: [144, 192, 144]
+  val_per_dataset: 100
+  num_workers: 2
+  lower_pct: 0.5
+  upper_pct: 99.5
+
+model:
+  in_channels: 1
+  base_channels: 64
+  channel_multipliers: [1, 2, 4, 4] 
+  num_res_blocks: 2
+
+  # Dual-stream head widths
+  anat_channels: 64                    # C_a (also codebook embedding dim)
+  mod_channels: 32                     # C_m
+
+  # Anatomical codebook
+  codebook_size: 4096   
+  commitment_beta: 0.25
+
+  # FiLM
+  modality_embed_dim: 32               # s_m dim
+  film_hidden: 256
+
+  dropout: 0.0
+  attention_levels: [2, 3]  
+  num_heads: 8
+
+training:
+  batch_size: 4         
+  gradient_accumulation_steps: 1
+  gradient_checkpointing: true
+  learning_rate: 4.5e-5
+  weight_decay: 0.01
+  max_epochs: 20
+  warmup_steps: 2000
+  mixed_precision: true
+  ema_decay: 0.999
+  seed: 42
+
+  # Loss weights
+  ssim_weight: 0.5                     # lambda_SSIM in L_rec
+  vq_weight: 1.0                       # weight on the VQ codebook+commitment loss
+  perceptual_weight: 0.001             # slice-wise VGG (reused)
+  fg_weight: 5.0
+  bg_threshold: -0.9
+  cross_weight: 0.5                    # weight on L_cross (after warmup ramp)
+  adv_weight: 0.001  
+  cross_start_step: 2000               # step at which L_cross begins ramping in
+  cross_ramp_steps: 2000               # length of the linear ramp
+  adv_start_step: 5000                 # step at which GRL alpha leaves 0
+
+  # 2D+3D joint training
+  joint_2d3d: true
+  prob_2d: 0.3
+  batch_size_2d: 8                     # paired slices: effective 16 slices/step
+  slices_per_volume: 8
+  loss_weight_2d: 0.5
+
+  save_every_n_steps: 5000
+  log_every_n_steps: 10
+
+wandb:
+  project: "neuroquant"
+  entity: "TBN"
+  name: null
+
+checkpoint:
+  output_dir: "checkpoints/neuroquant"
+  resume: null
+  resume_mode: "weights_only"
