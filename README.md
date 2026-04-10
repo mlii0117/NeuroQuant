@@ -47,9 +47,6 @@ NeuroQuant/
 └── README.md
 ```
 
-NeuroQuant has **zero external repo dependencies** — every building block lives inside
-this folder.
-
 ---
 
 ## Requirements
@@ -74,7 +71,7 @@ pip install torch torchvision nibabel numpy einops accelerate wandb pyyaml
 
 Hardware: training was developed on **4× NVIDIA H100 80GB**. With the default config
 (`target_shape: [144, 192, 144]`, `batch_size: 4` paired, gradient checkpointing on),
-each H100 holds ~50 GB.
+each H100 holds ~70 GB.
 
 ---
 
@@ -147,7 +144,7 @@ training:
   adv_start_step: 5000                 
   joint_2d3d: true
   prob_2d: 0.3
-
+```
 
 ---
 
